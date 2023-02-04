@@ -40,7 +40,7 @@ I haven't tested smartcard login or USB redirection.
 #/usr/bin/env bash
 set -euo pipefail
 IMAGE="localhost/citrix:latest"
-RUNPATH=${HOME}/run/citrixroot
+RUNPATH=${HOME}/.var/bwrap/citrixroot
 
 if [[ ! -d $RUNPATH ]]; then
   mkdir -p $RUNPATH && podman export $(podman create $IMAGE) | tar -C $RUNPATH -xf -
@@ -108,12 +108,12 @@ Type=Application
 StartupWMClass=Wfica
 NoDisplay=true
 Categories=Network;Office;
-Icon=/home/username/run/citrixroot/opt/Citrix/ICAClient/icons/receiver.png
+Icon=/home/username/.var/bwrap/citrixroot/opt/Citrix/ICAClient/icons/receiver.png
 Exec=/home/username/bin/wfica.sh %f
 MimeType=application/x-ica;application/vnd.citrix.receiver.configure;
 ```
 
 # Update
 
-1. `rm -rf ~/run/citrixroot`
+1. `rm -rf ~/.var/bwrap/citrixroot`
 2. Rebuild container
