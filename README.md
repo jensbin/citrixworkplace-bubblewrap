@@ -10,7 +10,6 @@ Working around issues and wrapping Citrix Workplace App for Linux.
 
 - Bubblewrap / bwrap (https://github.com/containers/bubblewrap)
 - podman or buildah (building the image)
-- Chromium browser (if weblogin is needed)
 
 # Limitations
 
