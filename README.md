@@ -53,7 +53,7 @@ fi
   --dev /dev \
   --tmpfs /tmp \
   --tmpfs /var/log \
-  --bind $HOME/.ICAClient/clientlicense /etc/icalicense/clientlicense \
+  --bind-try $HOME/.ICAClient/clientlicense /etc/icalicense/clientlicense \
   --tmpfs $HOME \
   --dir /var \
   --unshare-all \
@@ -73,7 +73,7 @@ fi
   --setenv GTK_THEME Adwaita:dark \
   --bind $HOME/Downloads $HOME/Downloads \
   --bind $HOME/.ICAClient $HOME/.ICAClient \
-  --ro-bind $HOME/.ICAClient/hdx_rtc_engine.json /var/.config/citrix/hdx_rtc_engine/config.json \
+  --ro-bind-try $HOME/.ICAClient/hdx_rtc_engine.json /var/.config/citrix/hdx_rtc_engine/config.json \
   --ro-bind /tmp/.X11-unix/X0 /tmp/.X11-unix/X0 \
   --setenv DISPLAY "$DISPLAY" \
   --setenv TZ "Europe/Zurich" \
