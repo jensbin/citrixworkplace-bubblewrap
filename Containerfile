@@ -12,18 +12,13 @@ RUN dpkg --add-architecture i386 && \
                        gnome-keyring libsecret-1-0 libxmu6 libxpm4 dbus-x11 \
                        xauth libcurl4 wget lsb-release wget sudo \
                        software-properties-common gnupg libidn11 libc++1 \
-                       libc++abi1 pulseaudio-utils && \
+                       libc++abi1 pulseaudio-utils locales materia-gtk-theme && dpkg-reconfigure locales && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-    #apt-get install -y vim firefox apt-utils xdg-utils libwebkit2gtk-4.0-37 libwebkitgtk-1.0-0 libxmu6 libxpm4 dbus-x11 xauth libcurl3 openssh-server wget && \
+
 
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
 RUN echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-12 main" >> /etc/apt/sources.list
-#ADD llvm.repo /etc/apt/sources.list.d/llvm.repo
-#RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh
-#RUN ./llvm.sh 12 && rm -f llvm.sh
 RUN apt-get update && apt-get install -y libunwind-12 && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-#RUN apt-get install -y chromium && apt-get clean
-#RUN apt-get install -y midori && apt-get clean
 
 COPY XlibNoSHM.c /
 RUN apt-get update && \
@@ -38,21 +33,21 @@ RUN apt-get update && \
 RUN useradd -ms /bin/bash $username
 
 RUN wget $(wget -O - https://www.citrix.com/downloads/workspace-app/linux/workspace-app-for-linux-latest.html | sed -ne '/icaclient_.*_amd64\.deb/ s/<a .* rel="\(.*\)" id="downloadcomponent">/https:\1/p' | sed -e 's/\r//g') -O /tmp/icaclient.deb
-RUN apt-get update && apt install -y -f /tmp/icaclient.deb && rm -f /tmp/icaclient.deb && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /etc/icalicense
+RUN apt-get update && dpkg -i /tmp/icaclient.deb && apt-get -y -f install && rm -f /tmp/icaclient.deb && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /etc/icalicense
 RUN ln -s /usr/share/ca-certificates/mozilla/* /opt/Citrix/ICAClient/keystore/cacerts/ && /opt/Citrix/ICAClient/util/ctx_rehash 
-#RUN ln -s /usr/share/ca-certificates/mozilla/* /opt/Citrix/ICAClient/keystore/cacerts/ && /app/ICAClient/linuxx64/util/ctx_rehash /app/ICAClient/linuxx64/keystore/cacerts/
+
 # create /config/.server to enable user customization using ~/.ICACLient/ overrides. Thanks Tomek
-RUN touch /opt/Citrix/ICAClient/config/.server
+#RUN touch /opt/Citrix/ICAClient/config/.server
+
 RUN sed -i \
         -e 's/Ceip=Enable/Ceip=Disable/' \
         -e 's/EnableLaunchDarkly=Enable/EnableLaunchDarkly=Disable/' \
         -e 's/DisableHeartBeat=False/DisableHeartBeat=True/' \
         /opt/Citrix/ICAClient/config/module.ini
-RUN sed -i '3i\\t<key>gRPCEnabled</key><value>false</value>' /opt/Citrix/ICAClient/config/AuthManConfig.xml
-RUN sed -i '3i\\t<GnomeKeyringDisabled>true</GnomeKeyringDisabled>' /opt/Citrix/ICAClient/config/AuthManConfig.xml
+#RUN sed -i '3i\\t<key>gRPCEnabled</key><value>false</value>' /opt/Citrix/ICAClient/config/AuthManConfig.xml
+#RUN sed -i '3i\\t<GnomeKeyringDisabled>true</GnomeKeyringDisabled>' /opt/Citrix/ICAClient/config/AuthManConfig.xml
 RUN ln -fs gst_play1.0 /opt/Citrix/ICAClient/util/gst_play ; ln -fs gst_read1.0 /opt/Citrix/ICAClient/util/gst_read
 RUN rm /opt/Citrix/ICAClient/lib/UIDialogLibWebKit.so
-
 
 RUN find /usr/share/doc -depth -type f ! -name copyright | xargs rm || true
 RUN find /usr/share/doc -empty | xargs rmdir || true
