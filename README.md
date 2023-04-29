@@ -17,9 +17,9 @@ Working around issues and wrapping Citrix Workplace App for Linux.
 
 # Solution
 
-- Installation of Citrix Workspace App into a container
+- Installation of [Citrix Workspace App](https://docs.citrix.com/en-us/citrix-workspace-app-for-linux/whats-new.html) into a container
 - Export the Container into a root filesystem
-- Use bwrap to simulate a new root filesystem
+- Use [bwrap](https://github.com/containers/bubblewrap) to simulate a new root filesystem
 
 Most of the time I use the weblogin and start `wfica` just to present the desktop. It is also possible to use `selfservice` login.
 
@@ -27,7 +27,7 @@ Most of the time I use the weblogin and start `wfica` just to present the deskto
 
 It works for my use case. Using weblogin and starting the virtual desktop, using MS Teams with optimization, screensharing and webcam.
 
-I mainly use it on NixOS.
+I mainly use it on [NixOS](https://nixos.org).
 
 I haven't tested smartcard login or USB redirection.
 
