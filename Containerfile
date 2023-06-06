@@ -3,18 +3,22 @@ FROM library/ubuntu:20.04
 ARG username
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV VERSION 23.5.0.58
+ENV SHA256 55c5e832e5e2a8281a1e1b515e567f3b87584e8a85ebc2ee55bc1cbe7b3d1c6d
 
 COPY ./01_nodoc /etc/dpkg/dpkg.cfg.d/
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y apt-utils xdg-utils libwebkit2gtk-4.0-37 libgtk2.0-0 procps \
+    apt-get install -y apt-utils psmisc xdg-utils libwebkit2gtk-4.0-37 libgtk2.0-0 procps \
                        gnome-keyring libsecret-1-0 libxmu6 libxpm4 dbus-x11 \
                        xauth libcurl4 libcurl3-gnutls wget lsb-release wget curl sudo \
-                       software-properties-common gnupg libidn11 libc++1 liboss4-salsa-asound2 \
-                       libc++abi1 pulseaudio-utils locales materia-gtk-theme && sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen && locale-gen && \
+                       software-properties-common gnupg libidn11 libc++1 \
+                       libpulse0 libasound2 libasound2-plugins \
+                       libc++abi1 locales materia-gtk-theme && \
+                       va-driver-all vainfo && \
+    sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen && locale-gen && \
     apt-get clean && apt-get autoclean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
 RUN echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main" >> /etc/apt/sources.list
@@ -32,13 +36,17 @@ RUN apt-get update && \
 
 RUN useradd -ms /bin/bash $username
 
-RUN wget $(wget -O - https://www.citrix.com/downloads/workspace-app/linux/workspace-app-for-linux-latest.html | sed -ne '/icaclient_.*_amd64\.deb/ s/<a .* rel="\(.*\)" id="downloadcomponent">/https:\1/p' | sed -e 's/\r//g') -O /tmp/icaclient.deb
+RUN wget $(wget -O - https://www.citrix.com/downloads/workspace-app/linux/workspace-app-for-linux-latest.html | sed -ne "/icaclient_${VERSION}_amd64\.deb/ s/<a .* rel=\"\(.*\)\" id=\"downloadcomponent\">/https:\1/p" | sed -e 's/\r//g') -O /tmp/icaclient.deb
+RUN echo "${SHA256}  /tmp/icaclient.deb" | sha256sum --check
 RUN apt-get update && dpkg -i /tmp/icaclient.deb && apt-get -y -f install && rm -f /tmp/icaclient.deb && apt-get clean && apt-get autoclean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /etc/icalicense
 RUN ln -s /usr/share/ca-certificates/mozilla/* /opt/Citrix/ICAClient/keystore/cacerts/ && /opt/Citrix/ICAClient/util/ctx_rehash 
 #RUN bash -c 'for i in /usr/share/ca-certificates/mozilla/*; do [[ $(date -d "$(openssl x509 -enddate -noout -in $i | cut -d '=' -f 2)" +%s) -ge $(date +%s) ]] && ln -s $i /opt/Citrix/ICAClient/keystore/cacerts/; done' && /opt/Citrix/ICAClient/util/ctx_rehash 
 
+RUN mkdir -p /var/.config/citrix/hdx_rtc_engine && \
+    echo '{ "VideoHwEncode": 1 }' > /var/.config/citrix/hdx_rtc_engine/config.json
+
 # create /config/.server to enable user customization using ~/.ICACLient/ overrides. Thanks Tomek
-#RUN touch /opt/Citrix/ICAClient/config/.server
+RUN touch /opt/Citrix/ICAClient/config/.server
 
 RUN sed -i \
         -e 's/Ceip=Enable/Ceip=Disable/' \
