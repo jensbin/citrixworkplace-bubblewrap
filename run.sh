@@ -13,6 +13,8 @@ eval "$ICAROOT/util/ctxcwalogd"
 
 #[[ -f /usr/local/lib/XlibNoSHM.so ]] && export LD_PRELOAD="libdl.so.2:/usr/local/lib/XlibNoSHM.so"
 
+#export LIBVA_DRIVER_NAME="iHD"
+
 if [[ -f "$@" ]]; then
   $ICAROOT/wfica -icaroot $ICAROOT "$@"
   #exec /app/ICAClient/linuxx64/wfica -icaroot /app/ICAClient/linuxx64 "$@"

@@ -3,12 +3,11 @@ FROM library/ubuntu:20.04
 ARG username
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV VERSION 23.5.0.58
-ENV SHA256 55c5e832e5e2a8281a1e1b515e567f3b87584e8a85ebc2ee55bc1cbe7b3d1c6d
+ENV VERSION 23.8.0.39
+ENV SHA256 c3ad743d256999bd4faa16d3ad4f7fdaed503f198a5dcf13eab0146a3aa2bde5
 
 COPY ./01_nodoc /etc/dpkg/dpkg.cfg.d/
-RUN dpkg --add-architecture i386 && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y apt-utils psmisc xdg-utils libwebkit2gtk-4.0-37 libgtk2.0-0 procps \
                        gnome-keyring libsecret-1-0 libxmu6 libxpm4 dbus-x11 \
@@ -16,7 +15,6 @@ RUN dpkg --add-architecture i386 && \
                        software-properties-common gnupg libidn11 libc++1 \
                        libpulse0 libasound2 libasound2-plugins \
                        libc++abi1 locales materia-gtk-theme && \
-                       va-driver-all vainfo && \
     sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen && locale-gen && \
     apt-get clean && apt-get autoclean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -42,15 +40,18 @@ RUN apt-get update && dpkg -i /tmp/icaclient.deb && apt-get -y -f install && rm 
 RUN ln -s /usr/share/ca-certificates/mozilla/* /opt/Citrix/ICAClient/keystore/cacerts/ && /opt/Citrix/ICAClient/util/ctx_rehash 
 #RUN bash -c 'for i in /usr/share/ca-certificates/mozilla/*; do [[ $(date -d "$(openssl x509 -enddate -noout -in $i | cut -d '=' -f 2)" +%s) -ge $(date +%s) ]] && ln -s $i /opt/Citrix/ICAClient/keystore/cacerts/; done' && /opt/Citrix/ICAClient/util/ctx_rehash 
 
-RUN mkdir -p /var/.config/citrix/hdx_rtc_engine && \
+#RUN apt-get update && apt-get install -y va-driver-all vainfo && rm -rf /var/lib/apt/lists/* && \
+RUN apt-get update && apt-get install -y va-driver-all vainfo gstreamer1.0-plugins-ugly gstreamer1.0-vaapi && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /var/.config/citrix/hdx_rtc_engine && \
     echo '{ "VideoHwEncode": 1 }' > /var/.config/citrix/hdx_rtc_engine/config.json
 
 # create /config/.server to enable user customization using ~/.ICACLient/ overrides. Thanks Tomek
 RUN touch /opt/Citrix/ICAClient/config/.server
 
+#        -e 's/EnableLaunchDarkly=Enable/EnableLaunchDarkly=Disable/' \
+#        -e 's/PacketLossConcealmentEnabled=FALSE/PacketLossConcealmentEnabled=TRUE/' \
 RUN sed -i \
         -e 's/Ceip=Enable/Ceip=Disable/' \
-        -e 's/EnableLaunchDarkly=Enable/EnableLaunchDarkly=Disable/' \
         -e 's/DisableHeartBeat=False/DisableHeartBeat=True/' \
         /opt/Citrix/ICAClient/config/module.ini
 #RUN sed -i '3i\\t<key>gRPCEnabled</key><value>false</value>' /opt/Citrix/ICAClient/config/AuthManConfig.xml
