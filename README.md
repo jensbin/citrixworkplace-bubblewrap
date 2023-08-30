@@ -81,6 +81,7 @@ config.json \
   --setenv TZ "Europe/Zurich" \
   --setenv HOME "$HOME" \
   --setenv LANG "en_US.UTF-8" \
+  --setenv LIBVA_DRIVER_NAME "iHD" \
   --ro-bind /sys/devices /sys/devices \
   --ro-bind-try /sys/class/power_supply /sys/class/power_supply \
   --ro-bind "$XDG_RUNTIME_DIR/at-spi/bus" "$XDG_RUNTIME_DIR/at-spi/bus" \
